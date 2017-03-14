@@ -3,25 +3,42 @@ unit ApplicationOptions;
 interface
 
 uses
-  IniFiles, SysUtils;
+  IniFiles, SysUtils, System.UITypes;
 
 type
+  TJournalDataSource = (jdcNone=-1, jdcAppDb, jdcWebApi);
+
   TApplicationOptions = class
   private
     FWebApiUrl: string;
-    FUseWebApi: boolean;
-    FUseAppDb: boolean;
     FFileName: string;
+    FQuestionsPerDay: integer;
+    FJournalDataSource: TJournalDataSource;
+    FAppPersistenceTop: integer;
+    FAppPersistenceHeight: integer;
+    FAppPersistenceLeft: integer;
+    FAppPersistenceWidth: integer;
+    FAppPersistenceState: TWindowState;
     procedure SetWebApiUrl(const Value: string);
-    procedure SetUseWebApi(const Value: boolean);
-    procedure SetUseAppDb(const Value: boolean);
     procedure InitialiseSettings;
+    procedure SetJournalDataSource(const Value: TJournalDataSource);
+    procedure SetQuestionsPerDay(const Value: integer);
+    procedure SetAppPersistenceHeight(const Value: integer);
+    procedure SetAppPersistenceLeft(const Value: integer);
+    procedure SetAppPersistenceState(const Value: TWindowState);
+    procedure SetAppPersistenceTop(const Value: integer);
+    procedure SetAppPersistenceWidth(const Value: integer);
   protected
 
   public
-    property UseWebApi: boolean read FUseWebApi write SetUseWebApi;
     property WebApiUrl: string read FWebApiUrl write SetWebApiUrl;
-    property UseAppDb: boolean read FUseAppDb write SetUseAppDb;
+    property JournalDataSource: TJournalDataSource read FJournalDataSource write SetJournalDataSource;
+    property QuestionsPerDay: integer read FQuestionsPerDay write SetQuestionsPerDay;
+    property AppPersistenceTop: integer read FAppPersistenceTop write SetAppPersistenceTop;
+    property AppPersistenceLeft: integer read FAppPersistenceLeft write SetAppPersistenceLeft;
+    property AppPersistenceWidth: integer read FAppPersistenceWidth write SetAppPersistenceWidth;
+    property AppPersistenceHeight: integer read FAppPersistenceHeight write SetAppPersistenceHeight;
+    property AppPersistenceState: TWindowState read FAppPersistenceState write SetAppPersistenceState;
 
     procedure SaveSettings;
 
@@ -44,9 +61,15 @@ var
 begin
   IniFile := TIniFile.Create(FFileName);
   try
-    FUseWebApi := iniFile.ReadBool('General','UseWebApi', false);
-    FUseAppDb := iniFile.ReadBool('General','UseAppDb', true);
-    FWebApiUrl := iniFile.ReadString('General','WebApiUrl', '');
+    SetJournalDataSource(TJournalDataSource(iniFile.ReadInteger('General','JournalDataSource', 0)));
+    SetWebApiUrl(iniFile.ReadString('General','WebApiUrl', ''));
+    SetQuestionsPerDay(iniFile.ReadInteger('General','QuestionsPerDay', 3));
+
+    SetAppPersistenceTop(iniFile.ReadInteger('AppPersistence','Top', -1));
+    SetAppPersistenceLeft(iniFile.ReadInteger('AppPersistence','Left', -1));
+    SetAppPersistenceWidth(iniFile.ReadInteger('AppPersistence','Width', -1));
+    SetAppPersistenceHeight(iniFile.ReadInteger('AppPersistence','Height', -1));
+    SetAppPersistenceState(TWindowState(iniFile.ReadInteger('AppPersistence','State', integer(TWindowState.wsNormal))));
   finally
     FreeAndNil(IniFile);
   end;
@@ -58,28 +81,59 @@ var
 begin
   IniFile := TIniFile.Create(FFileName);
   try
-    iniFile.WriteBool('General','UseWebApi', FUseWebApi);
-    iniFile.WriteBool('General','UseAppDb', FUseAppDb);
+    iniFile.WriteInteger('General','JournalDataSource', integer(FJournalDataSource));
     iniFile.WriteString('General','WebApiUrl', FWebApiUrl);
+    iniFile.WriteInteger('General','QuestionsPerDay', FQuestionsPerDay);
+
+    iniFile.WriteInteger('AppPersistence','Top', FAppPersistenceTop);
+    iniFile.WriteInteger('AppPersistence','Left', FAppPersistenceLeft);
+    iniFile.WriteInteger('AppPersistence','Width', FAppPersistenceWidth);
+    iniFile.WriteInteger('AppPersistence','Height', FAppPersistenceHeight);
+    iniFile.WriteInteger('AppPersistence','State', integer(FAppPersistenceState));
   finally
     FreeAndNil(IniFile);
   end;
 end;
 
-procedure TApplicationOptions.SetUseAppDb(const Value: boolean);
+procedure TApplicationOptions.SetAppPersistenceHeight(const Value: integer);
 begin
-  FUseAppDb := Value;
+  FAppPersistenceHeight := Value;
 end;
 
-procedure TApplicationOptions.SetUseWebApi(const Value: boolean);
+procedure TApplicationOptions.SetAppPersistenceLeft(const Value: integer);
 begin
-  FUseWebApi := Value;
+  FAppPersistenceLeft := Value;
+end;
+
+procedure TApplicationOptions.SetAppPersistenceState(const Value: TWindowState);
+begin
+  FAppPersistenceState := Value;
+end;
+
+procedure TApplicationOptions.SetAppPersistenceTop(const Value: integer);
+begin
+  FAppPersistenceTop := Value;
+end;
+
+procedure TApplicationOptions.SetAppPersistenceWidth(const Value: integer);
+begin
+  FAppPersistenceWidth := Value;
+end;
+
+procedure TApplicationOptions.SetJournalDataSource(
+  const Value: TJournalDataSource);
+begin
+  FJournalDataSource := Value;
+end;
+
+procedure TApplicationOptions.SetQuestionsPerDay(const Value: integer);
+begin
+  FQuestionsPerDay := Value;
 end;
 
 procedure TApplicationOptions.SetWebApiUrl(const Value: string);
 begin
   FWebApiUrl := Value;
 end;
-
 
 end.

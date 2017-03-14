@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, ApplicationOptions;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, ApplicationOptions,
+  Vcl.Samples.Spin;
 
 type
   TfrmOptions = class(TForm)
@@ -15,6 +16,8 @@ type
     rdgAccessJournalEntries: TRadioGroup;
     Label1: TLabel;
     edtWebApiUrl: TEdit;
+    Label2: TLabel;
+    spnQuestionsPerDay: TSpinEdit;
     procedure FormCreate(Sender: TObject);
     procedure rdgAccessJournalEntriesClick(Sender: TObject);
     procedure btnOkClick(Sender: TObject);
@@ -32,9 +35,9 @@ implementation
 
 procedure TfrmOptions.btnOkClick(Sender: TObject);
 begin
-  FApplicationOptions.UseWebApi := rdgAccessJournalEntries.ItemIndex = 1;
-  FApplicationOptions.UseAppDb := rdgAccessJournalEntries.ItemIndex = 0;
+  FApplicationOptions.JournalDataSource := TJournalDataSource(rdgAccessJournalEntries.ItemIndex);
   FApplicationOptions.WebApiUrl := edtWebApiUrl.Text;
+  FApplicationOptions.QuestionsPerDay := spnQuestionsPerDay.Value;
   FApplicationOptions.SaveSettings;
 end;
 
@@ -52,14 +55,9 @@ end;
 
 procedure TfrmOptions.FormCreate(Sender: TObject);
 begin
-  if FApplicationOptions.UseAppDb then
-    rdgAccessJournalEntries.ItemIndex := 0
-  else if FApplicationOptions.UseWebApi then
-    rdgAccessJournalEntries.ItemIndex := 1
-  else
-    rdgAccessJournalEntries.ItemIndex := -1;
-
+  rdgAccessJournalEntries.ItemIndex := integer(FApplicationOptions.JournalDataSource);
   edtWebApiUrl.Text := FApplicationOptions.WebApiUrl;
+  spnQuestionsPerDay.Value := FApplicationOptions.QuestionsPerDay;
   SetControlState;
 end;
 
