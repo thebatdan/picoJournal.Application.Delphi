@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, ApplicationOptions;
 
 type
   TfrmOptions = class(TForm)
@@ -12,28 +12,60 @@ type
     Panel2: TPanel;
     btnOk: TButton;
     btnCancel: TButton;
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    rdgAccessJournalEntries: TRadioGroup;
+    Label1: TLabel;
+    edtWebApiUrl: TEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure rdgAccessJournalEntriesClick(Sender: TObject);
+    procedure btnOkClick(Sender: TObject);
   private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+    FApplicationOptions: TApplicationOptions;
 
-var
-  frmOptions: TfrmOptions;
+    procedure SetControlState;
+  public
+    constructor Create(AOwner: TComponent; applicationOptions: TApplicationOptions); reintroduce;
+  end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TfrmOptions.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfrmOptions.btnOkClick(Sender: TObject);
 begin
-  if ModalResult = mrOk Then
-    ShowMessage('Ok!')
+  FApplicationOptions.UseWebApi := rdgAccessJournalEntries.ItemIndex = 1;
+  FApplicationOptions.UseAppDb := rdgAccessJournalEntries.ItemIndex = 0;
+  FApplicationOptions.WebApiUrl := edtWebApiUrl.Text;
+  FApplicationOptions.SaveSettings;
+end;
 
+constructor TfrmOptions.Create(AOwner: TComponent;
+  applicationOptions: TApplicationOptions);
+begin
+  FApplicationOptions := applicationOptions;
+  inherited Create(AOwner);
+end;
+
+procedure TfrmOptions.SetControlState;
+begin
+  edtWebApiUrl.Enabled := rdgAccessJournalEntries.ItemIndex = 1;
+end;
+
+procedure TfrmOptions.FormCreate(Sender: TObject);
+begin
+  if FApplicationOptions.UseAppDb then
+    rdgAccessJournalEntries.ItemIndex := 0
+  else if FApplicationOptions.UseWebApi then
+    rdgAccessJournalEntries.ItemIndex := 1
   else
-    ShowMessage('Not Ok :-(') ;
+    rdgAccessJournalEntries.ItemIndex := -1;
 
+  edtWebApiUrl.Text := FApplicationOptions.WebApiUrl;
+  SetControlState;
+end;
+
+procedure TfrmOptions.rdgAccessJournalEntriesClick(Sender: TObject);
+begin
+  SetControlState;
 end;
 
 end.

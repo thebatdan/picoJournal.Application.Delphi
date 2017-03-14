@@ -2,7 +2,7 @@ object frmOptions: TfrmOptions
   Left = 0
   Top = 0
   Caption = 'frmOptions'
-  ClientHeight = 256
+  ClientHeight = 204
   ClientWidth = 436
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -12,29 +12,52 @@ object frmOptions: TfrmOptions
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
-  OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
     Top = 0
     Width = 436
-    Height = 215
+    Height = 163
     Align = alClient
     TabOrder = 0
-    ExplicitTop = -6
-    ExplicitWidth = 448
-    ExplicitHeight = 205
+    ExplicitHeight = 215
+    object Label1: TLabel
+      Left = 7
+      Top = 128
+      Width = 68
+      Height = 13
+      Caption = 'Web API URL:'
+    end
+    object rdgAccessJournalEntries: TRadioGroup
+      Left = 7
+      Top = 8
+      Width = 416
+      Height = 105
+      Caption = 'Access Journal Entries using '
+      Items.Strings = (
+        'Local Application Database'
+        'Web API')
+      TabOrder = 0
+      OnClick = rdgAccessJournalEntriesClick
+    end
+    object edtWebApiUrl: TEdit
+      Left = 96
+      Top = 125
+      Width = 327
+      Height = 21
+      TabOrder = 1
+    end
   end
   object Panel2: TPanel
     Left = 0
-    Top = 215
+    Top = 163
     Width = 436
     Height = 41
     Align = alBottom
     TabOrder = 1
-    ExplicitTop = 205
-    ExplicitWidth = 448
+    ExplicitTop = 215
     DesignSize = (
       436
       41)
@@ -48,11 +71,11 @@ object frmOptions: TfrmOptions
       Default = True
       ModalResult = 1
       TabOrder = 0
-      ExplicitLeft = 279
+      OnClick = btnOkClick
     end
     object btnCancel: TButton
       Left = 348
-      Top = 8
+      Top = 6
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -60,7 +83,6 @@ object frmOptions: TfrmOptions
       Caption = 'Cancel'
       ModalResult = 2
       TabOrder = 1
-      ExplicitLeft = 360
     end
   end
 end

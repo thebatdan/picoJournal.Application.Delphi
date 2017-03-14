@@ -16,13 +16,20 @@ object frmMain: TfrmMain
   PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
-    Left = 232
-    Top = 152
-    Width = 75
+    Left = 336
+    Top = 213
+    Width = 104
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Get Entry Text'
     TabOrder = 0
     OnClick = Button1Click
+  end
+  object Memo1: TMemo
+    Left = 8
+    Top = 8
+    Width = 432
+    Height = 199
+    TabOrder = 1
   end
   object MainMenu1: TMainMenu
     Left = 40

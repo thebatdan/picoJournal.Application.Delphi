@@ -4,9 +4,6 @@
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="picoJournal.Application\picoJournal.dproj">
-            <Dependencies>picoJournal.Domain\picoJournalDomain.dproj</Dependencies>
-        </Projects>
-        <Projects Include="picoJournal.Domain\picoJournalDomain.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -17,32 +14,23 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="picoJournal" DependsOnTargets="picoJournalDomain">
+    <Target Name="picoJournal">
         <MSBuild Projects="picoJournal.Application\picoJournal.dproj"/>
     </Target>
-    <Target Name="picoJournal:Clean" DependsOnTargets="picoJournalDomain:Clean">
+    <Target Name="picoJournal:Clean">
         <MSBuild Projects="picoJournal.Application\picoJournal.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="picoJournal:Make" DependsOnTargets="picoJournalDomain:Make">
+    <Target Name="picoJournal:Make">
         <MSBuild Projects="picoJournal.Application\picoJournal.dproj" Targets="Make"/>
     </Target>
-    <Target Name="picoJournalDomain">
-        <MSBuild Projects="picoJournal.Domain\picoJournalDomain.dproj"/>
-    </Target>
-    <Target Name="picoJournalDomain:Clean">
-        <MSBuild Projects="picoJournal.Domain\picoJournalDomain.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="picoJournalDomain:Make">
-        <MSBuild Projects="picoJournal.Domain\picoJournalDomain.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="picoJournal;picoJournalDomain"/>
+        <CallTarget Targets="picoJournal"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="picoJournal:Clean;picoJournalDomain:Clean"/>
+        <CallTarget Targets="picoJournal:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="picoJournal:Make;picoJournalDomain:Make"/>
+        <CallTarget Targets="picoJournal:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

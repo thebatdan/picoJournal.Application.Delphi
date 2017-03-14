@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, JournalEntryClass, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, JournalEntry, Vcl.StdCtrls, ApplicationOptionsFactory;
 
 type
   TfrmMain = class(TForm)
@@ -14,11 +14,12 @@ type
     Tools1: TMenuItem;
     Options1: TMenuItem;
     Button1: TButton;
+    Memo1: TMemo;
     procedure Exit1Click(Sender: TObject);
     procedure Options1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
-    { Private declarations }
+    procedure WriteMessage(msgText: string);
   public
     { Public declarations }
   end;
@@ -34,13 +35,12 @@ uses Options;
 
 procedure TfrmMain.Button1Click(Sender: TObject);
 var
-  jeMessage: string;
-  je: JournalEntry;
+  je: TJournalEntry;
 begin
   try
-    je := JournalEntry.Create;
-    jeMessage := je.GetJournalEntry;
-    ShowMessage(jeMessage);
+    je := TJournalEntry.Create;
+    je.EntryText := 'Text or some such...';
+    WriteMessage(je.EntryText);
   finally
     FreeAndNil(je);
   end;
@@ -52,8 +52,24 @@ begin
 end;
 
 procedure TfrmMain.Options1Click(Sender: TObject);
+var
+  frmOptions: TFrmOptions;
 begin
-  frmOptions.ShowModal;
+  frmOptions := TfrmOptions.Create(Self, TApplicationOptionsFactory.GetApplicationOptions);
+  try
+
+    if frmOptions.ShowModal = mrOk then
+      WriteMessage('It''s Ok :)')
+    else
+      WriteMessage('Not Ok :(');
+  finally
+    FreeAndNil(frmOptions);
+  end;
+end;
+
+procedure TfrmMain.WriteMessage(msgText: string);
+begin
+  Memo1.Lines.Add(msgText);
 end;
 
 end.

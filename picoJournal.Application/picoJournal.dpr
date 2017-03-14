@@ -4,7 +4,11 @@ uses
   Vcl.Forms,
   PicoJournalMain in 'PicoJournalMain.pas' {frmMain},
   Options in 'Options.pas' {frmOptions},
-  JournalEntryClass in 'JournalEntryClass.pas';
+  JournalEntry in 'JournalEntry.pas',
+  Question in 'Question.pas',
+  ApplicationOptions in 'ApplicationOptions.pas',
+  ApplicationOptionsFactory in 'ApplicationOptionsFactory.pas',
+  JournalRepository in 'JournalRepository.pas';
 
 {$R *.res}
 
@@ -12,6 +16,5 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmMain, frmMain);
-  Application.CreateForm(TfrmOptions, frmOptions);
   Application.Run;
 end.
