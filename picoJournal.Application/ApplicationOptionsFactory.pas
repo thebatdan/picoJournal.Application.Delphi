@@ -7,7 +7,10 @@ uses
 
 type
   TApplicationOptionsFactory = class
-     class function GetApplicationOptions: TApplicationOptions;
+  private
+
+  public
+    class function GetApplicationOptions: TApplicationOptions;
   end;
 
 implementation
