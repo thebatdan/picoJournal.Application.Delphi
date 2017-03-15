@@ -4,9 +4,9 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, System.Generics.Collections,
   JournalEntry, ApplicationOptionsFactory, JournalServiceFactory, JournalService,
-  ApplicationOptions;
+  ApplicationOptions, Question;
 
 type
   TfrmMain = class(TForm)
@@ -46,9 +46,9 @@ var
 begin
   journalService := TJournalServiceFactory.GetJournalService(FApplicationOptions);
   try
-    je := journalService.GetJournalEntry(-1);
+    je := journalService.GetJournalEntry(7);
     try
-      WriteMessage(je.EntryText);
+      WriteMessage(je.Answer);
     finally
       FreeAndNil(je);
     end;

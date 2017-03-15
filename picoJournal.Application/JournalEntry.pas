@@ -9,30 +9,30 @@ type
 
   TJournalEntry = Class
     private
-    FDate: TDateTime;
+    FEntryDate: TDateTime;
     FQuestion: TQuestion;
     FQuestionId: Integer;
-    FEntryText: string;
+    FAnswer: string;
     FId: Integer;
     procedure SetQuestion(const Value: TQuestion);
-    function GetEntryText: string;
+    function GetAnswer: string;
     procedure SetId(const Value: Integer);
 
     protected
 
     public
       property Id: Integer read FId write SetId;
-      property Date: TDateTime read FDate write FDate;
+      property EntryDate: TDateTime read FEntryDate write FEntryDate;
       property QuestionId: Integer read FQuestionId write FQuestionId;
       property Question: TQuestion read FQuestion write SetQuestion;
-      property EntryText: string read GetEntryText write FEntryText;
+      property Answer: string read GetAnswer write FAnswer;
   end;
 
 implementation
 
-function TJournalEntry.GetEntryText: string;
+function TJournalEntry.GetAnswer: string;
 begin
-  Result := FEntryText;
+  Result := FAnswer;
 end;
 
 procedure TJournalEntry.SetId(const Value: Integer);

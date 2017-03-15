@@ -19,6 +19,7 @@ type
     FAppPersistenceLeft: integer;
     FAppPersistenceWidth: integer;
     FAppPersistenceState: TWindowState;
+    FDbConnectionString: string;
     procedure SetWebApiUrl(const Value: string);
     procedure InitialiseSettings;
     procedure SetJournalDataSource(const Value: TJournalDataSource);
@@ -28,6 +29,7 @@ type
     procedure SetAppPersistenceState(const Value: TWindowState);
     procedure SetAppPersistenceTop(const Value: integer);
     procedure SetAppPersistenceWidth(const Value: integer);
+    procedure SetDbConnectionString(const Value: string);
   protected
 
   public
@@ -39,6 +41,7 @@ type
     property AppPersistenceWidth: integer read FAppPersistenceWidth write SetAppPersistenceWidth;
     property AppPersistenceHeight: integer read FAppPersistenceHeight write SetAppPersistenceHeight;
     property AppPersistenceState: TWindowState read FAppPersistenceState write SetAppPersistenceState;
+    property DbConnectionString: string read FDbConnectionString write SetDbConnectionString;
 
     procedure SaveSettings;
 
@@ -63,6 +66,7 @@ begin
   try
     SetJournalDataSource(TJournalDataSource(iniFile.ReadInteger('General','JournalDataSource', 0)));
     SetWebApiUrl(iniFile.ReadString('General','WebApiUrl', ''));
+    SetDbConnectionString(iniFile.ReadString('General','DbConnectionString', ''));
     SetQuestionsPerDay(iniFile.ReadInteger('General','QuestionsPerDay', 3));
 
     SetAppPersistenceTop(iniFile.ReadInteger('AppPersistence','Top', -1));
@@ -83,6 +87,7 @@ begin
   try
     iniFile.WriteInteger('General','JournalDataSource', integer(FJournalDataSource));
     iniFile.WriteString('General','WebApiUrl', FWebApiUrl);
+    iniFile.WriteString('General','DbConnectionString', FDbConnectionString);
     iniFile.WriteInteger('General','QuestionsPerDay', FQuestionsPerDay);
 
     iniFile.WriteInteger('AppPersistence','Top', FAppPersistenceTop);
@@ -118,6 +123,11 @@ end;
 procedure TApplicationOptions.SetAppPersistenceWidth(const Value: integer);
 begin
   FAppPersistenceWidth := Value;
+end;
+
+procedure TApplicationOptions.SetDbConnectionString(const Value: string);
+begin
+  FDbConnectionString := Value;
 end;
 
 procedure TApplicationOptions.SetJournalDataSource(

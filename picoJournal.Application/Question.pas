@@ -6,15 +6,15 @@ type
   TQuestion = class
   private
     FId: Integer;
-    FText: string;
+    FQuestion: string;
     procedure SetId(const Value: Integer);
-    procedure SetText(const Value: string);
+    procedure SetQuestion(const Value: string);
 
   protected
 
   public
     property Id: Integer read FId write SetId;
-    property Text: string read FText write SetText;
+    property Question: string read FQuestion write SetQuestion;
   end;
 
 implementation
@@ -26,9 +26,9 @@ begin
   FId := Value;
 end;
 
-procedure TQuestion.SetText(const Value: string);
+procedure TQuestion.SetQuestion(const Value: string);
 begin
-  FText := Value;
+  FQuestion := Value;
 end;
 
 end.

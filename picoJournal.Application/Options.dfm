@@ -22,7 +22,6 @@ object frmOptions: TfrmOptions
     Height = 245
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 174
     object Label1: TLabel
       Left = 7
       Top = 128
@@ -31,11 +30,18 @@ object frmOptions: TfrmOptions
       Caption = 'Web API URL:'
     end
     object Label2: TLabel
-      Left = 7
-      Top = 168
+      Left = 6
+      Top = 182
       Width = 92
       Height = 13
       Caption = 'Questions per day:'
+    end
+    object Label3: TLabel
+      Left = 7
+      Top = 155
+      Width = 74
+      Height = 13
+      Caption = 'DB Connection:'
     end
     object edtWebApiUrl: TEdit
       Left = 104
@@ -58,13 +64,20 @@ object frmOptions: TfrmOptions
     end
     object spnQuestionsPerDay: TSpinEdit
       Left = 104
-      Top = 165
+      Top = 179
       Width = 65
       Height = 22
       MaxValue = 10
       MinValue = 0
       TabOrder = 2
       Value = 0
+    end
+    object edtDbConnection: TEdit
+      Left = 104
+      Top = 152
+      Width = 319
+      Height = 21
+      TabOrder = 3
     end
   end
   object Panel2: TPanel
@@ -74,8 +87,6 @@ object frmOptions: TfrmOptions
     Height = 41
     Align = alBottom
     TabOrder = 1
-    ExplicitLeft = 8
-    ExplicitTop = 200
     DesignSize = (
       436
       41)

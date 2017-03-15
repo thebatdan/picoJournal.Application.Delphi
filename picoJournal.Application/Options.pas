@@ -18,6 +18,8 @@ type
     edtWebApiUrl: TEdit;
     Label2: TLabel;
     spnQuestionsPerDay: TSpinEdit;
+    Label3: TLabel;
+    edtDbConnection: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure rdgAccessJournalEntriesClick(Sender: TObject);
     procedure btnOkClick(Sender: TObject);
@@ -37,6 +39,7 @@ procedure TfrmOptions.btnOkClick(Sender: TObject);
 begin
   FApplicationOptions.JournalDataSource := TJournalDataSource(rdgAccessJournalEntries.ItemIndex);
   FApplicationOptions.WebApiUrl := edtWebApiUrl.Text;
+  FApplicationOptions.DbConnectionString := edtDbConnection.Text;
   FApplicationOptions.QuestionsPerDay := spnQuestionsPerDay.Value;
   FApplicationOptions.SaveSettings;
 end;
@@ -51,12 +54,14 @@ end;
 procedure TfrmOptions.SetControlState;
 begin
   edtWebApiUrl.Enabled := rdgAccessJournalEntries.ItemIndex = 1;
+  edtDbConnection.Enabled := rdgAccessJournalEntries.ItemIndex = 0;
 end;
 
 procedure TfrmOptions.FormCreate(Sender: TObject);
 begin
   rdgAccessJournalEntries.ItemIndex := integer(FApplicationOptions.JournalDataSource);
   edtWebApiUrl.Text := FApplicationOptions.WebApiUrl;
+  edtDbConnection.Text := FApplicationOptions.DbConnectionString;
   spnQuestionsPerDay.Value := FApplicationOptions.QuestionsPerDay;
   SetControlState;
 end;
