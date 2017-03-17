@@ -1,9 +1,9 @@
-unit JournalEntry;
+unit JournalEntryClass;
 
 interface
 
 uses
-  Question;
+  QuestionClass;
 
 type
 

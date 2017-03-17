@@ -3,7 +3,8 @@ unit WebApiRepository;
 interface
 
 uses
-  JournalRepository, System.Generics.Collections, Question, JournalEntry;
+  System.Generics.Collections,
+  JournalRepository, QuestionClass, JournalEntryClass, JournalDateSummaryClass;
 
 type
   TWebApiRepository = class(TInterfacedObject, IJournalRepository)
@@ -14,12 +15,12 @@ type
   public
     function GetQuestion(id: integer): TQuestion;
     procedure GetAllQuestions(var AQuestions: TList<TQuestion>);
-    procedure GetRandomQuestions(AQuestionCount: integer; var AQuestions: TList<TQuestion>);
+    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TList<TQuestion>);
 
     function CreateQuestion(AQuestion: TQuestion): TQuestion;
     procedure UpdateQuestion(AQuestion: TQuestion);
     procedure DeleteQuestion(AQuestion: TQuestion); overload;
-    procedure DeleteQuestion(id: Integer); overload;
+    procedure DeleteQuestion(id: integer); overload;
 
     function GetJournalEntry(id: integer): TJournalEntry;
     procedure GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
@@ -28,7 +29,10 @@ type
     function CreateJournalEntry(AJournalEntry: TJournalEntry): TJournalEntry;
     procedure UpdateJournalEntry(AJournalEntry: TJournalEntry);
     procedure DeleteJournalEntry(AJournalEntry: TJournalEntry); overload;
-    procedure DeleteJournalEntry(id: Integer); overload;
+    procedure DeleteJournalEntry(id: integer); overload;
+
+    procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate;
+      var AJournalDateSummary: TList<TJournalDateSummary>);
   end;
 
 implementation
@@ -50,12 +54,12 @@ begin
 
 end;
 
-procedure TWebApiRepository.DeleteJournalEntry(id: Integer);
+procedure TWebApiRepository.DeleteJournalEntry(id: integer);
 begin
 
 end;
 
-procedure TWebApiRepository.DeleteQuestion(id: Integer);
+procedure TWebApiRepository.DeleteQuestion(id: integer);
 begin
 
 end;
@@ -71,6 +75,12 @@ begin
 end;
 
 procedure TWebApiRepository.GetAllQuestions(var AQuestions: TList<TQuestion>);
+begin
+
+end;
+
+procedure TWebApiRepository.GetJournalDateSummary(ADateFrom, ADateTo: TDate;
+  var AJournalDateSummary: TList<TJournalDateSummary>);
 begin
 
 end;
@@ -94,7 +104,8 @@ begin
 
 end;
 
-procedure TWebApiRepository.GetRandomQuestions(AQuestionCount: integer; var AQuestions: TList<TQuestion>);
+procedure TWebApiRepository.GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate;
+  var AQuestions: TList<TQuestion>);
 begin
 
 end;

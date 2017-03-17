@@ -5,8 +5,8 @@ interface
 uses
   System.Generics.Collections, SysUtils,
   FireDAC.Comp.Client, FireDAC.VCLUI.Wait, FireDAC.Stan.Def, FireDAC.Stan.Param,
-  FireDAC.Stan.ASync, FireDAC.Phys.MSSQL, FireDac.Dapt,
-  JournalRepository, Question, JournalEntry;
+  FireDAC.Stan.ASync, FireDAC.Phys.MSSQL, FireDAC.Dapt,
+  JournalRepository, QuestionClass, JournalEntryClass, JournalDateSummaryClass;
 
 type
   TApplicationDbRepository = class(TInterfacedObject, IJournalRepository)
@@ -15,7 +15,8 @@ type
     function GetBaseQuery: TFDQuery;
     function GetJournalEntryBaseQuery: TFDQuery;
     function GetQuestionBaseQuery: TFDQuery;
-    procedure JournalEntryQueryToList(query: TFDQuery; var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
+    procedure JournalEntryQueryToList(query: TFDQuery;
+      var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
     function MapQueryToJournalEntry(query: TFDQuery): TJournalEntry;
     function MapQueryToQuestion(query: TFDQuery): TQuestion;
   protected
@@ -23,12 +24,12 @@ type
   public
     function GetQuestion(id: integer): TQuestion;
     procedure GetAllQuestions(var AQuestions: TList<TQuestion>);
-    procedure GetRandomQuestions(AQuestionCount: integer; var AQuestions: TList<TQuestion>);
+    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TList<TQuestion>);
 
     function CreateQuestion(AQuestion: TQuestion): TQuestion;
     procedure UpdateQuestion(AQuestion: TQuestion);
     procedure DeleteQuestion(AQuestion: TQuestion); overload;
-    procedure DeleteQuestion(id: Integer); overload;
+    procedure DeleteQuestion(id: integer); overload;
 
     function GetJournalEntry(id: integer): TJournalEntry;
     procedure GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
@@ -37,7 +38,10 @@ type
     function CreateJournalEntry(AJournalEntry: TJournalEntry): TJournalEntry;
     procedure UpdateJournalEntry(AJournalEntry: TJournalEntry);
     procedure DeleteJournalEntry(AJournalEntry: TJournalEntry); overload;
-    procedure DeleteJournalEntry(id: Integer); overload;
+    procedure DeleteJournalEntry(id: integer); overload;
+
+    procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate;
+      var AJournalDateSummary: TList<TJournalDateSummary>);
 
     constructor Create(connectionString: string);
     destructor Destroy; override;
@@ -78,22 +82,22 @@ end;
 
 procedure TApplicationDbRepository.DeleteJournalEntry(AJournalEntry: TJournalEntry);
 begin
-  DeleteJournalEntry(AJournalEntry.Id);
+  DeleteJournalEntry(AJournalEntry.id);
 end;
 
-procedure TApplicationDbRepository.DeleteJournalEntry(id: Integer);
+procedure TApplicationDbRepository.DeleteJournalEntry(id: integer);
 begin
   FConnection.ExecSQL('delete from dbo.JournalEntry where Id = :id', [id]);
 end;
 
-procedure TApplicationDbRepository.DeleteQuestion(id: Integer);
+procedure TApplicationDbRepository.DeleteQuestion(id: integer);
 begin
   FConnection.ExecSQL('delete from dbo.Question where Id = :id', [id]);
 end;
 
 procedure TApplicationDbRepository.DeleteQuestion(AQuestion: TQuestion);
 begin
-  DeleteQuestion(AQuestion.Id);
+  DeleteQuestion(AQuestion.id);
 end;
 
 destructor TApplicationDbRepository.Destroy;
@@ -107,40 +111,40 @@ end;
 
 function TApplicationDbRepository.MapQueryToJournalEntry(query: TFDQuery): TJournalEntry;
 var
-  aJournalEntry: TJournalEntry;
+  AJournalEntry: TJournalEntry;
 begin
-  aJournalEntry := TJournalEntry.Create;
-  aJournalEntry.Question := TQuestion.Create;
-  aJournalEntry.Id := query.FieldByName('Id').AsInteger;
-  aJournalEntry.EntryDate := query.FieldByName('EntryDate').AsDateTime;
-  aJournalEntry.QuestionId := query.FieldByName('QuestionId').AsInteger;
-  aJournalEntry.Answer := query.FieldByName('Answer').AsString;
-  ajournalEntry.Question.Id := aJournalEntry.QuestionId;
-  aJournalEntry.Question.Question := query.FieldByName('Question').AsString;
-  result := aJournalEntry;
+  AJournalEntry := TJournalEntry.Create;
+  AJournalEntry.Question := TQuestion.Create;
+  AJournalEntry.id := query.FieldByName('Id').AsInteger;
+  AJournalEntry.entryDate := query.FieldByName('EntryDate').AsDateTime;
+  AJournalEntry.QuestionId := query.FieldByName('QuestionId').AsInteger;
+  AJournalEntry.Answer := query.FieldByName('Answer').AsString;
+  AJournalEntry.Question.id := AJournalEntry.QuestionId;
+  AJournalEntry.Question.Question := query.FieldByName('Question').AsString;
+  Result := AJournalEntry;
 end;
 
-function TApplicationDbRepository.MapQueryToQuestion(
-  query: TFDQuery): TQuestion;
+function TApplicationDbRepository.MapQueryToQuestion(query: TFDQuery): TQuestion;
 var
-  aQuestion: TQuestion;
+  AQuestion: TQuestion;
 begin
-  aQuestion := TQuestion.Create;
-  aQuestion.Id := query.FieldByName('Id').AsInteger;
-  aQuestion.Question := query.FieldByName('Question').AsString;
-  result := aQuestion;
+  AQuestion := TQuestion.Create;
+  AQuestion.id := query.FieldByName('Id').AsInteger;
+  AQuestion.Question := query.FieldByName('Question').AsString;
+  Result := AQuestion;
 end;
 
-procedure TApplicationDbRepository.JournalEntryQueryToList(query: TFDQuery; var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
+procedure TApplicationDbRepository.JournalEntryQueryToList(query: TFDQuery;
+  var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
 var
-  aJournalEntry: TJournalEntry;
+  AJournalEntry: TJournalEntry;
 begin
   query.Open;
   query.First;
   while (not query.Eof) do
   begin
-    aJournalEntry := MapQueryToJournalEntry(query);
-    AJournalEntries.Add(aJournalEntry);
+    AJournalEntry := MapQueryToJournalEntry(query);
+    AJournalEntries.Add(AJournalEntry);
     query.Next;
   end;
   query.Close;
@@ -152,7 +156,7 @@ var
 begin
   query := TFDQuery.Create(nil);
   query.Connection := FConnection;
-  result := query;
+  Result := query;
 end;
 
 procedure TApplicationDbRepository.GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
@@ -170,7 +174,7 @@ end;
 procedure TApplicationDbRepository.GetAllQuestions(var AQuestions: TList<TQuestion>);
 var
   query: TFDQuery;
-  aQuestion: TQuestion;
+  AQuestion: TQuestion;
 begin
   query := GetQuestionBaseQuery;
   try
@@ -178,11 +182,40 @@ begin
     query.First;
     while (not query.Eof) do
     begin
-      aQuestion := MapQueryToQuestion(query);
-      AQuestions.Add(aQuestion);
+      AQuestion := MapQueryToQuestion(query);
+      AQuestions.Add(AQuestion);
       query.Next;
     end;
 
+    query.Close;
+  finally
+    FreeAndNil(query);
+  end;
+end;
+
+procedure TApplicationDbRepository.GetJournalDateSummary(ADateFrom, ADateTo: TDate;
+  var AJournalDateSummary: TList<TJournalDateSummary>);
+var
+  query: TFDQuery;
+  journalDateSummary: TJournalDateSummary;
+begin
+  query := GetBaseQuery;
+  query.sql.Add('select EntryDate, Count(*) as EntryCount from dbo.JournalEntry');
+  query.sql.Add('where EntryDate >= :startDate and EntryDate <= :endDate');
+  query.sql.Add('group by EntryDate');
+  try
+    query.ParamByName('startDate').AsDate := ADateFrom;
+    query.ParamByName('endDate').AsDate := ADateTo;
+    query.Open;
+    query.First;
+    while (not query.Eof) do
+    begin
+      journalDateSummary := TJournalDateSummary.Create;
+      journalDateSummary.JournalDate := query.FieldByName('EntryDate').AsDateTime;
+      journalDateSummary.EntryCount := query.FieldByName('EntryCount').AsInteger;
+      AJournalDateSummary.Add(journalDateSummary);
+      query.Next;
+    end;
     query.Close;
   finally
     FreeAndNil(query);
@@ -195,7 +228,7 @@ var
   query: TFDQuery;
 begin
   query := GetJournalEntryBaseQuery;
-  query.SQL.Add('where je.EntryDate = :entryDate');
+  query.sql.Add('where je.EntryDate = :entryDate');
   try
     query.ParamByName('entryDate').AsDate := AEntryDate;
     JournalEntryQueryToList(query, AJournalEntries);
@@ -206,25 +239,25 @@ end;
 
 function TApplicationDbRepository.GetJournalEntry(id: integer): TJournalEntry;
 var
-  aJournalEntry: TJournalEntry;
+  AJournalEntry: TJournalEntry;
   query: TFDQuery;
 begin
-  aJournalEntry := nil;
+  AJournalEntry := nil;
   query := GetJournalEntryBaseQuery;
-  query.SQL.Add('where je.Id = :id');
+  query.sql.Add('where je.Id = :id');
   try
     query.ParamByName('id').AsInteger := id;
     query.Open;
     query.First;
     if query.RecordCount = 1 then
-      aJournalEntry := MapQueryToJournalEntry(query);
+      AJournalEntry := MapQueryToJournalEntry(query);
 
     query.Close;
   finally
     FreeAndNil(query);
   end;
 
-  Result := aJournalEntry;
+  Result := AJournalEntry;
 end;
 
 function TApplicationDbRepository.GetJournalEntryBaseQuery: TFDQuery;
@@ -232,32 +265,32 @@ var
   query: TFDQuery;
 begin
   query := GetBaseQuery;
-  query.SQL.Add('select je.Id, je.EntryDate, je.QuestionId, je.Answer, q.Question');
-  query.SQL.Add('from dbo.JournalEntry je join dbo.Question q on je.QuestionId = q.Id');
-  result := query;
+  query.sql.Add('select je.Id, je.EntryDate, je.QuestionId, je.Answer, q.Question');
+  query.sql.Add('from dbo.JournalEntry je join dbo.Question q on je.QuestionId = q.Id');
+  Result := query;
 end;
 
 function TApplicationDbRepository.GetQuestion(id: integer): TQuestion;
 var
-  aQuestion: TQuestion;
+  AQuestion: TQuestion;
   query: TFDQuery;
 begin
-  aQuestion:= nil;
+  AQuestion := nil;
   query := GetQuestionBaseQuery;
-  query.SQL.Add('where Id = :id');
+  query.sql.Add('where Id = :id');
   try
     query.ParamByName('id').AsInteger := id;
     query.Open;
     query.First;
     if query.RecordCount = 1 then
-      aQuestion := MapQueryToQuestion(query);
+      AQuestion := MapQueryToQuestion(query);
 
     query.Close;
   finally
     FreeAndNil(query);
   end;
 
-  Result := aQuestion;
+  Result := AQuestion;
 end;
 
 function TApplicationDbRepository.GetQuestionBaseQuery: TFDQuery;
@@ -265,25 +298,32 @@ var
   query: TFDQuery;
 begin
   query := GetBaseQuery;
-  query.SQL.Add('select Id, Question from dbo.Question');
-  result := query;
+  query.sql.Add('select Id, Question from dbo.Question');
+  Result := query;
 end;
 
-procedure TApplicationDbRepository.GetRandomQuestions(AQuestionCount: integer; var AQuestions: TList<TQuestion>);
+procedure TApplicationDbRepository.GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate;
+  var AQuestions: TList<TQuestion>);
 var
   query: TFDQuery;
-  aQuestion: TQuestion;
+  AQuestion: TQuestion;
 begin
   query := GetBaseQuery;
   try
-    query.SQL.Add('select top (:QuestionCount) Id, Question from dbo.Question order by newid()');
-    query.ParamByName('QuestionCount').AsInteger := AQuestionCount;
+    query.sql.Add('select top (:questionCount) Id, Question from dbo.Question q');
+    query.sql.Add('where not exists (');
+		query.sql.Add(' select null from dbo.JournalEntry je');
+		query.sql.Add(' where je.QuestionId = q.Id');
+		query.sql.Add(' and je.EntryDate = :entryDate)');
+    query.sql.Add('order by newid()');
+    query.ParamByName('questionCount').AsInteger := AQuestionCount;
+    query.ParamByName('entryDate').AsDate := AEntryDate;
     query.Open();
     query.First;
     while (not query.Eof) do
     begin
-      aQuestion := MapQueryToQuestion(query);
-      AQuestions.Add(aQuestion);
+      AQuestion := MapQueryToQuestion(query);
+      AQuestions.Add(AQuestion);
       query.Next;
     end;
 
@@ -299,16 +339,16 @@ var
   query: TFDQuery;
 begin
   query := GetBaseQuery;
-  query.SQL.Add('update dbo.JournalEntry set');
-  query.SQL.Add('  EntryDate = :entryDate,' );
-  query.SQL.Add('  QuestionId = :questionId,');
-  query.SQL.Add('  Answer = :answer');
-  query.SQL.Add('where id = :id');
+  query.sql.Add('update dbo.JournalEntry set');
+  query.sql.Add('  EntryDate = :entryDate,');
+  query.sql.Add('  QuestionId = :questionId,');
+  query.sql.Add('  Answer = :answer');
+  query.sql.Add('where id = :id');
   try
-    query.ParamByName('entryDate').AsDate := AJournalEntry.EntryDate;
+    query.ParamByName('entryDate').AsDate := AJournalEntry.entryDate;
     query.ParamByName('questionId').AsInteger := AJournalEntry.QuestionId;
     query.ParamByName('answer').AsString := AJournalEntry.Answer;
-    query.ParamByName('id').AsInteger := AJournalEntry.Id;
+    query.ParamByName('id').AsInteger := AJournalEntry.id;
     query.ExecSQL;
   finally
     FreeAndNil(query);
@@ -320,12 +360,12 @@ var
   query: TFDQuery;
 begin
   query := GetBaseQuery;
-  query.SQL.Add('update dbo.Question set');
-  query.SQL.Add('  Question = :question');
-  query.SQL.Add('where id = :id');
+  query.sql.Add('update dbo.Question set');
+  query.sql.Add('  Question = :question');
+  query.sql.Add('where id = :id');
   try
     query.ParamByName('question').AsString := AQuestion.Question;
-    query.ParamByName('id').AsInteger := AQuestion.Id;
+    query.ParamByName('id').AsInteger := AQuestion.id;
     query.ExecSQL;
   finally
     FreeAndNil(query);

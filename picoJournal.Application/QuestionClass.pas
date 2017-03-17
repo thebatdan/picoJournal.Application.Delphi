@@ -1,4 +1,4 @@
-unit Question;
+unit QuestionClass;
 
 interface
 

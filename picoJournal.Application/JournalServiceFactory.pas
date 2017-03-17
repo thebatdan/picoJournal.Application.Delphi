@@ -4,22 +4,22 @@ interface
 
 uses
   SysUtils,
-  ApplicationOptions, JournalService, JournalRepository, ApplicationDbRepository,
-  WebApiRepository;
+  ApplicationOptions, JournalServiceClass, JournalRepository, ApplicationDbRepository,
+  WebApiRepository, JournalServiceInterface;
 
 type
   TJournalServiceFactory = class
   private
 
   public
-    class function GetJournalService(applicationOptions: TApplicationOptions): TJournalService;
+    class function GetJournalService(applicationOptions: TApplicationOptions): IJournalService;
   end;
 
 implementation
 
 { TJournalServiceFactory }
 
-class function TJournalServiceFactory.GetJournalService(applicationOptions: TApplicationOptions): TJournalService;
+class function TJournalServiceFactory.GetJournalService(applicationOptions: TApplicationOptions): IJournalService;
 var
   repository: IJournalRepository;
 begin
@@ -31,7 +31,7 @@ begin
       raise Exception.Create('No valid Journal Access options defined');
   end;
 
-  result := TJournalService.Create(repository);
+  result := TJournalService.Create(repository, applicationOptions.QuestionsPerDay);
 end;
 
 end.
