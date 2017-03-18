@@ -1,10 +1,11 @@
 object fmeJournalEntry: TfmeJournalEntry
   Left = 0
   Top = 0
-  Width = 337
+  Width = 451
   Height = 67
   Align = alTop
   TabOrder = 0
+  ExplicitWidth = 337
   object Panel1: TPanel
     Left = 0
     Top = 0
@@ -16,7 +17,7 @@ object fmeJournalEntry: TfmeJournalEntry
     object lblQuestion: TLabel
       Left = 5
       Top = 5
-      Width = 327
+      Width = 50
       Height = 13
       Align = alTop
       Caption = 'Question'
@@ -26,7 +27,6 @@ object fmeJournalEntry: TfmeJournalEntry
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitWidth = 50
     end
     object memJournalEntry: TMemo
       Left = 5

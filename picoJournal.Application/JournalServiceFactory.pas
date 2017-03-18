@@ -26,7 +26,7 @@ begin
   repository := nil;
   case applicationOptions.JournalDataSource of
     jdcAppDb : repository := TApplicationDbRepository.Create(applicationOptions.DbConnectionString);
-    jdcWebApi: repository := TWebApiRepository.Create;
+    jdcWebApi: repository := TWebApiRepository.Create(applicationOptions.WebApiUrl);
     else
       raise Exception.Create('No valid Journal Access options defined');
   end;

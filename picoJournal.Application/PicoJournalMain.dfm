@@ -32,7 +32,7 @@ object frmMain: TfrmMain
       Width = 235
       Height = 160
       Align = alTop
-      Date = 42795.824349710650000000
+      Date = 42795.461444444450000000
       TabOrder = 0
       TabStop = True
       OnClick = mclJournalDateClick
@@ -55,6 +55,15 @@ object frmMain: TfrmMain
       Caption = 'Next Day >'
       TabOrder = 2
       OnClick = btnNextDayClick
+    end
+    object btnRestTest: TButton
+      Left = 0
+      Top = 247
+      Width = 89
+      Height = 25
+      Caption = 'REST Test'
+      TabOrder = 3
+      OnClick = btnRestTestClick
     end
   end
   object Panel3: TPanel

@@ -1,7 +1,4 @@
-﻿[Button1]
-Coordinates=84,10,59,58
-
-[Exit1]
+﻿[Exit1]
 Coordinates=59,77,43,36
 
 [File1]
@@ -10,9 +7,6 @@ Coordinates=180,1,43,36
 [Options1]
 Coordinates=180,56,66,36
 
-[Memo1]
-Coordinates=10,10,64,58
-
 [Tools1]
 Coordinates=180,111,53,36
 
@@ -20,5 +14,5 @@ Coordinates=180,111,53,36
 Coordinates=284,1,81,36
 
 []
-Coordinates=284,56,91,36
+Coordinates=10,10,64,58
 

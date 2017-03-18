@@ -24,6 +24,7 @@ type
     pnlJournalEditorList: TPanel;
     Panel1: TPanel;
     btnSaveJournalEntries: TButton;
+    btnRestTest: TButton;
     procedure Exit1Click(Sender: TObject);
     procedure Options1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -33,6 +34,7 @@ type
     procedure btnPreviousDayClick(Sender: TObject);
     procedure btnNextDayClick(Sender: TObject);
     procedure btnSaveJournalEntriesClick(Sender: TObject);
+    procedure btnRestTestClick(Sender: TObject);
   private
     FApplicationOptions: TApplicationOptions;
     FJournalEditorList: TList<TfmeJournalEntry>;
@@ -52,7 +54,7 @@ implementation
 
 {$R *.dfm}
 
-uses Options;
+uses Options, RESTtest;
 
 procedure TfrmMain.btnNextDayClick(Sender: TObject);
 begin
@@ -62,6 +64,18 @@ end;
 procedure TfrmMain.btnPreviousDayClick(Sender: TObject);
 begin
   ChangeCalendarDate(mclJournalDate.Date - 1, Sender);
+end;
+
+procedure TfrmMain.btnRestTestClick(Sender: TObject);
+var
+  frmRestTest: TFrmRestTest;
+begin
+  frmRestTest := TFrmRestTest.Create(Self, FApplicationOptions.WebApiUrl);
+  try
+    frmRestTest.ShowModal;
+  finally
+    FreeAndNil(frmRestTest);
+  end;
 end;
 
 procedure TfrmMain.btnSaveJournalEntriesClick(Sender: TObject);
@@ -245,7 +259,7 @@ begin
       begin
         TWinControl(pnlJournalEditorList.Controls[i]).TabOrder := pnlJournalEditorList.ControlCount - i;
       end;                          
-        
+
         
 
     finally

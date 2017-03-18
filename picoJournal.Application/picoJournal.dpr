@@ -15,7 +15,8 @@ uses
   WebApiRepository in 'WebApiRepository.pas',
   JournalDateSummaryClass in 'JournalDateSummaryClass.pas',
   JournalServiceInterface in 'JournalServiceInterface.pas',
-  JournalEntryFrame in 'JournalEntryFrame.pas' {fmeJournalEntry: TFrame};
+  JournalEntryFrame in 'JournalEntryFrame.pas' {fmeJournalEntry: TFrame},
+  RESTtest in 'RESTtest.pas' {frmRestTest};
 
 {$R *.res}
 

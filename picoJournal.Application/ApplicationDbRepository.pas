@@ -76,7 +76,7 @@ var
 begin
   sql := 'insert into dbo.Question(Question) values (:question); ';
   sql := sql + 'SELECT SCOPE_IDENTITY()';
-  AQuestion.id := FConnection.ExecSQLScalar(sql, [AQuestion.Question]);
+  AQuestion.id := FConnection.ExecSQLScalar(sql, [AQuestion.QuestionText]);
   Result := AQuestion;
 end;
 
@@ -120,7 +120,7 @@ begin
   AJournalEntry.QuestionId := query.FieldByName('QuestionId').AsInteger;
   AJournalEntry.Answer := query.FieldByName('Answer').AsString;
   AJournalEntry.Question.id := AJournalEntry.QuestionId;
-  AJournalEntry.Question.Question := query.FieldByName('Question').AsString;
+  AJournalEntry.Question.QuestionText := query.FieldByName('Question').AsString;
   Result := AJournalEntry;
 end;
 
@@ -130,7 +130,7 @@ var
 begin
   AQuestion := TQuestion.Create;
   AQuestion.id := query.FieldByName('Id').AsInteger;
-  AQuestion.Question := query.FieldByName('Question').AsString;
+  AQuestion.QuestionText := query.FieldByName('Question').AsString;
   Result := AQuestion;
 end;
 
@@ -364,7 +364,7 @@ begin
   query.sql.Add('  Question = :question');
   query.sql.Add('where id = :id');
   try
-    query.ParamByName('question').AsString := AQuestion.Question;
+    query.ParamByName('question').AsString := AQuestion.QuestionText;
     query.ParamByName('id').AsInteger := AQuestion.id;
     query.ExecSQL;
   finally

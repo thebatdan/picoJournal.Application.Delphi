@@ -32,7 +32,7 @@ constructor TfmeJournalEntry.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   FJournalEntry := AJournalEntry;
-  lblQuestion.Caption := FJournalEntry.Question.Question;
+  lblQuestion.Caption := FJournalEntry.Question.QuestionText;
   memJournalEntry.Text := FJournalEntry.Answer;
   memJournalEntry.Enabled := IsSameDay(FJournalEntry.EntryDate, Date);
 end;
