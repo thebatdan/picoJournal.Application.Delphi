@@ -34,7 +34,10 @@ begin
   FJournalEntry := AJournalEntry;
   lblQuestion.Caption := FJournalEntry.Question.QuestionText;
   memJournalEntry.Text := FJournalEntry.Answer;
-  memJournalEntry.Enabled := IsSameDay(FJournalEntry.EntryDate, Date);
+
+  // For now, allow any day to be edited.
+  // Eventually. older days will be locked down and only the current day can be edited.
+  //memJournalEntry.Enabled := IsSameDay(FJournalEntry.EntryDate, Date);
 end;
 
 procedure TfmeJournalEntry.memJournalEntryChange(Sender: TObject);

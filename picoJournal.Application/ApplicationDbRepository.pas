@@ -16,15 +16,15 @@ type
     function GetJournalEntryBaseQuery: TFDQuery;
     function GetQuestionBaseQuery: TFDQuery;
     procedure JournalEntryQueryToList(query: TFDQuery;
-      var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
+      var AJournalEntries: TObjectList<TJournalEntry>);
     function MapQueryToJournalEntry(query: TFDQuery): TJournalEntry;
     function MapQueryToQuestion(query: TFDQuery): TQuestion;
   protected
 
   public
     function GetQuestion(id: integer): TQuestion;
-    procedure GetAllQuestions(var AQuestions: TList<TQuestion>);
-    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TList<TQuestion>);
+    procedure GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
+    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TObjectList<TQuestion>);
 
     function CreateQuestion(AQuestion: TQuestion): TQuestion;
     procedure UpdateQuestion(AQuestion: TQuestion);
@@ -32,8 +32,8 @@ type
     procedure DeleteQuestion(id: integer); overload;
 
     function GetJournalEntry(id: integer): TJournalEntry;
-    procedure GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
-    procedure GetJournalEntriesForDay(AEntryDate: TDate; var AJournalEntries: TList<TJournalEntry>);
+    procedure GetAllJournalEntries(var AJournalEntries: TObjectList<TJournalEntry>);
+    procedure GetJournalEntriesForDay(AEntryDate: TDate; var AJournalEntries: TObjectList<TJournalEntry>);
 
     function CreateJournalEntry(AJournalEntry: TJournalEntry): TJournalEntry;
     procedure UpdateJournalEntry(AJournalEntry: TJournalEntry);
@@ -41,7 +41,7 @@ type
     procedure DeleteJournalEntry(id: integer); overload;
 
     procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate;
-      var AJournalDateSummary: TList<TJournalDateSummary>);
+      var AJournalDateSummary: TObjectList<TJournalDateSummary>);
 
     constructor Create(connectionString: string);
     destructor Destroy; override;
@@ -135,7 +135,7 @@ begin
 end;
 
 procedure TApplicationDbRepository.JournalEntryQueryToList(query: TFDQuery;
-  var AJournalEntries: System.Generics.Collections.TList<TJournalEntry>);
+  var AJournalEntries: TObjectList<TJournalEntry>);
 var
   AJournalEntry: TJournalEntry;
 begin
@@ -159,7 +159,7 @@ begin
   Result := query;
 end;
 
-procedure TApplicationDbRepository.GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
+procedure TApplicationDbRepository.GetAllJournalEntries(var AJournalEntries: TObjectList<TJournalEntry>);
 var
   query: TFDQuery;
 begin
@@ -171,7 +171,7 @@ begin
   end;
 end;
 
-procedure TApplicationDbRepository.GetAllQuestions(var AQuestions: TList<TQuestion>);
+procedure TApplicationDbRepository.GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
 var
   query: TFDQuery;
   AQuestion: TQuestion;
@@ -194,7 +194,7 @@ begin
 end;
 
 procedure TApplicationDbRepository.GetJournalDateSummary(ADateFrom, ADateTo: TDate;
-  var AJournalDateSummary: TList<TJournalDateSummary>);
+  var AJournalDateSummary: TObjectList<TJournalDateSummary>);
 var
   query: TFDQuery;
   journalDateSummary: TJournalDateSummary;
@@ -223,7 +223,7 @@ begin
 end;
 
 procedure TApplicationDbRepository.GetJournalEntriesForDay(AEntryDate: TDate;
-  var AJournalEntries: TList<TJournalEntry>);
+  var AJournalEntries: TObjectList<TJournalEntry>);
 var
   query: TFDQuery;
 begin
@@ -303,7 +303,7 @@ begin
 end;
 
 procedure TApplicationDbRepository.GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate;
-  var AQuestions: TList<TQuestion>);
+  var AQuestions: TObjectList<TQuestion>);
 var
   query: TFDQuery;
   AQuestion: TQuestion;

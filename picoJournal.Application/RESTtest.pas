@@ -4,9 +4,9 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IPPeerClient,
-  Data.Bind.Components, Data.Bind.ObjectScope, Vcl.ExtCtrls, Vcl.StdCtrls,
-  Vcl.Samples.Spin, JournalEntryClass, WebApiRepository, Vcl.ComCtrls,QuestionClass;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Generics.Collections, DateUtils,
+  Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Samples.Spin,
+  JournalEntryClass, WebApiRepository, Vcl.ComCtrls,QuestionClass, JournalDateSummaryClass;
 
 type
   TfrmRestTest = class(TForm)
@@ -20,7 +20,7 @@ type
     btnQuestionDelete: TButton;
     btnQuestionPost: TButton;
     btnQuestionPut: TButton;
-    Button10: TButton;
+    btnJournalEntryGetForDate: TButton;
     btnJournalEntryGetAll: TButton;
     Panel1: TPanel;
     Label3: TLabel;
@@ -63,10 +63,14 @@ type
     procedure btnQuestionPutClick(Sender: TObject);
     procedure btnQuestionGetAllClick(Sender: TObject);
     procedure btnQuestionGetRandomClick(Sender: TObject);
+    procedure btnJournalEntryGetForDateClick(Sender: TObject);
+    procedure btnJournalEntrySummaryClick(Sender: TObject);
   private
     FWebApiRepository: TWebApiRepository;
     procedure WriteJournalEntryOutput(journalEntry: TJournalEntry);
     procedure WriteQuestionOutput(AQuestion: TQuestion);
+    procedure WriteJournalEntryListOutput(journalEntryList: TObjectList<TJournalEntry>);
+    procedure FreeJournalEntryList(journalEntryList: TObjectList<TJournalEntry>);
     { Private declarations }
   public
     constructor Create(AOwner: TComponent; AWebApiUrl: string); reintroduce;
@@ -76,10 +80,6 @@ type
 implementation
 
 {$R *.dfm}
-
-uses Generics.Collections, DateUtils;
-
-
 
 { TfrmRestTest }
 
@@ -142,6 +142,25 @@ begin
   end;
 end;
 
+procedure TfrmRestTest.btnJournalEntrySummaryClick(Sender: TObject);
+var
+  journalDateSummaryList: TObjectList<TJournalDateSummary>;
+  journalDateSummary: TJournalDateSummary;
+begin
+  journalDateSummaryList := TObjectList<TJournalDateSummary>.Create;
+  try
+    FWebApiRepository.GetJournalDateSummary(dtJournalEntrySummaryDateFrom.Date, dtJournalEntrySummaryDateTo.Date, journalDateSummaryList);
+    memRestResponse.Clear;
+    for journalDateSummary in journalDateSummaryList do
+    begin
+      memRestResponse.Lines.Add(Format('Date: %s; Journal Entry Count: %d',
+        [DateToStr(journalDateSummary.JournalDate), journalDateSummary.EntryCount]));
+    end;
+  finally
+    FreeAndNil(journalDateSummaryList);
+  end;
+end;
+
 procedure TfrmRestTest.btnQuestionDeleteClick(Sender: TObject);
 begin
   FWebApiRepository.DeleteQuestion(spnQuestionId.Value);
@@ -156,7 +175,7 @@ var
 begin
   QuestionList := TObjectList<TQuestion>.Create;
   try
-    FWebApiRepository.GetAllQuestions(TList<TQuestion>(QuestionList));
+    FWebApiRepository.GetAllQuestions(QuestionList);
 
     memRestResponse.Clear;
     for question in QuestionList do
@@ -196,7 +215,7 @@ var
 begin
   QuestionList := TObjectList<TQuestion>.Create;
   try
-    FWebApiRepository.GetRandomQuestions(spnQuestionCount.Value, dtQuestionEntryDate.Date, TList<TQuestion>(QuestionList));
+    FWebApiRepository.GetRandomQuestions(spnQuestionCount.Value, dtQuestionEntryDate.Date, QuestionList);
 
     memRestResponse.Clear;
     for question in QuestionList do
@@ -240,6 +259,19 @@ begin
   end;
 end;
 
+procedure TfrmRestTest.btnJournalEntryGetForDateClick(Sender: TObject);
+var
+  journalEntryList: TObjectList<TJournalEntry>;
+begin
+  journalEntryList := TObjectList<TJournalEntry>.Create;
+  try
+    FWebApiRepository.GetJournalEntriesForDay(dtJournalEntryDate.Date, journalEntryList);
+    WriteJournalEntryListOutput(journalEntryList);
+  finally
+    FreeJournalEntryList(journalEntryList);
+  end;
+end;
+
 procedure TfrmRestTest.btnJournalEntryDeleteClick(Sender: TObject);
 begin
   FWebApiRepository.DeleteJournalEntry(spnJournalEntryId.Value);
@@ -250,23 +282,13 @@ end;
 procedure TfrmRestTest.btnJournalEntryGetAllClick(Sender: TObject);
 var
   journalEntryList: TObjectList<TJournalEntry>;
-  journalEntry: TJournalEntry;
 begin
   journalEntryList := TObjectList<TJournalEntry>.Create;
   try
-    FWebApiRepository.GetAllJournalEntries(TList<TJournalEntry>(journalEntryList));
-
-    memRestResponse.Clear;
-    for journalEntry in journalEntryList do
-    begin
-      WriteJournalEntryOutput(journalEntry);
-    end;
+    FWebApiRepository.GetAllJournalEntries(journalEntryList);
+    WriteJournalEntryListOutput(journalEntryList);
   finally
-    for journalEntry in journalEntryList do
-    begin
-      journalEntry.Question.Free;
-    end;
-    FreeAndNil(journalEntryList);
+    FreeJournalEntryList(journalEntryList);
   end;
 end;
 
@@ -280,6 +302,28 @@ destructor TfrmRestTest.Destroy;
 begin
   FreeAndNil(FWebApiRepository);
   inherited;
+end;
+
+procedure TfrmRestTest.FreeJournalEntryList(journalEntryList: TObjectList<TJournalEntry>);
+var
+  journalEntry: TJournalEntry;
+begin
+  for journalEntry in journalEntryList do
+  begin
+    journalEntry.Question.Free;
+  end;
+  FreeAndNil(journalEntryList);
+end;
+
+procedure TfrmRestTest.WriteJournalEntryListOutput(journalEntryList: TObjectList<TJournalEntry>);
+var
+  journalEntry: TJournalEntry;
+begin
+  memRestResponse.Clear;
+  for journalEntry in journalEntryList do
+  begin
+    WriteJournalEntryOutput(journalEntry);
+  end;
 end;
 
 procedure TfrmRestTest.WriteJournalEntryOutput(journalEntry: TJournalEntry);
@@ -311,6 +355,5 @@ begin
     memRestResponse.Lines.Add('No Question found.');
   end;
 end;
-
 
 end.

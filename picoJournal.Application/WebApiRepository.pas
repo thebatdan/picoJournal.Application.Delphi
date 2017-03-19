@@ -3,7 +3,8 @@ unit WebApiRepository;
 interface
 
 uses
-  System.Generics.Collections, REST.Client, SysUtils, REST.Json, REST.Types, System.JSON,
+  System.Generics.Collections, REST.Client, SysUtils, REST.Json, REST.Types,
+  System.JSON, IPPeerClient,
   JournalRepository, QuestionClass, JournalEntryClass, JournalDateSummaryClass, System.Classes;
 
 type
@@ -16,12 +17,13 @@ type
     function IncludeTrailingForwardSlash(const Value: string): string;
     procedure InitialiseWebApiConnection(AMethod: TRESTRequestMethod; ABaseUrl: string);
     procedure FinaliseWebApiConnection;
+    function FormatJsonDate(ADate: TDate): string;
   protected
 
   public
     function GetQuestion(id: integer): TQuestion;
-    procedure GetAllQuestions(var AQuestions: TList<TQuestion>);
-    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TList<TQuestion>);
+    procedure GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
+    procedure GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate; var AQuestions: TObjectList<TQuestion>);
 
     function CreateQuestion(AQuestion: TQuestion): TQuestion;
     procedure UpdateQuestion(AQuestion: TQuestion);
@@ -29,8 +31,8 @@ type
     procedure DeleteQuestion(id: integer); overload;
 
     function GetJournalEntry(id: integer): TJournalEntry;
-    procedure GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
-    procedure GetJournalEntriesForDay(entryDate: TDate; var AJournalEntries: TList<TJournalEntry>);
+    procedure GetAllJournalEntries(var AJournalEntries: TObjectList<TJournalEntry>);
+    procedure GetJournalEntriesForDay(entryDate: TDate; var AJournalEntries: TObjectList<TJournalEntry>);
 
     function CreateJournalEntry(AJournalEntry: TJournalEntry): TJournalEntry;
     procedure UpdateJournalEntry(AJournalEntry: TJournalEntry);
@@ -38,7 +40,7 @@ type
     procedure DeleteJournalEntry(id: integer); overload;
 
     procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate;
-      var AJournalDateSummary: TList<TJournalDateSummary>);
+      var AJournalDateSummary: TObjectList<TJournalDateSummary>);
 
     constructor Create(webApiUrl: string);
     destructor Destroy; override;
@@ -48,8 +50,12 @@ implementation
 
 Const
   API_JOURNAL_ENTRY = 'journalentry';
+  API_JOURNAL_ENTRY_FOR_DATE = 'journalentry/fordate';
+  API_JOURNAL_ENTRY_DATE_SUMMARY = 'journalentry/journaldatesummary';
   API_QUESTION = 'question';
   API_QUESTION_RANDOM = 'question/random';
+
+  JSON_DATE_FORMAT = 'yyyy-mm-dd';
 
 { TWebApiRepository }
 
@@ -60,22 +66,30 @@ end;
 
 function TWebApiRepository.CreateJournalEntry(AJournalEntry: TJournalEntry): TJournalEntry;
 var
-  journalEntryResult: TJournalEntry;
+  journalEntryForJson: TJournalEntry;
 begin
   InitialiseWebApiConnection(rmPOST, FWebApiUrl + API_JOURNAL_ENTRY);
   try
-    FRestRequest.Body.Add(TJson.ObjectToJsonString(AJournalEntry), ctAPPLICATION_JSON);
-    FRestRequest.Execute;
-
-    journalEntryResult := TJson.JsonToObject<TJournalEntry>(FRestResponse.Content);
+    journalEntryForJson := TJournalEntry.Create;
     try
-      AJournalEntry.Id := journalEntryResult.Id;
-      AJournalEntry.EntryDate := journalEntryResult.EntryDate;
-      AJournalEntry.QuestionId := journalEntryResult.QuestionId;
-      AJournalEntry.Question := journalEntryResult.Question;
-      AJournalEntry.Answer := journalEntryResult.Answer;
+      journalEntryForJson.EntryDate := AJournalEntry.EntryDate;
+      journalEntryForJson.QuestionId := AJournalEntry.QuestionId;
+      journalEntryForJson.Answer := AJournalEntry.Answer;
+      FRestRequest.AddBody(TJson.ObjectToJsonString(journalEntryForJson), ctAPPLICATION_JSON);
+      FRestRequest.Execute;
     finally
-      FreeAndNil(journalEntryResult);
+      FreeAndNil(journalEntryForJson);
+    end;
+
+    journalEntryForJson := TJson.JsonToObject<TJournalEntry>(FRestResponse.Content);
+    try
+      AJournalEntry.Id := journalEntryForJson.Id;
+      AJournalEntry.EntryDate := journalEntryForJson.EntryDate;
+      AJournalEntry.QuestionId := journalEntryForJson.QuestionId;
+      AJournalEntry.Answer := journalEntryForJson.Answer;
+    finally
+      journalEntryForJson.Question.Free;
+      FreeAndNil(journalEntryForJson);
     end;
   finally
     FinaliseWebApiConnection;
@@ -90,7 +104,7 @@ var
 begin
   InitialiseWebApiConnection(rmPOST, FWebApiUrl + API_QUESTION);
   try
-    FRestRequest.Body.Add(TJson.ObjectToJsonString(AQuestion), ctAPPLICATION_JSON);
+    FRestRequest.AddBody(TJson.ObjectToJsonString(AQuestion), ctAPPLICATION_JSON);
     FRestRequest.Execute;
 
     questionResult := TJson.JsonToObject<TQuestion>(FRestResponse.Content);
@@ -141,7 +155,13 @@ end;
 procedure TWebApiRepository.FinaliseWebApiConnection;
 begin
   FRestRequest.Params.Clear;
+  FRestRequest.ClearBody;
   FreeAndNil(FRestClient);
+end;
+
+function TWebApiRepository.FormatJsonDate(ADate: TDate): string;
+begin
+  result := FormatDateTime(JSON_DATE_FORMAT, ADate);
 end;
 
 procedure TWebApiRepository.DeleteQuestion(AQuestion: TQuestion);
@@ -149,7 +169,7 @@ begin
   DeleteQuestion(AQuestion.Id);
 end;
 
-procedure TWebApiRepository.GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
+procedure TWebApiRepository.GetAllJournalEntries(var AJournalEntries: TObjectList<TJournalEntry>);
 var
   jsonArr: TJSONArray;
   jsonValue : TJSONValue;
@@ -173,7 +193,7 @@ begin
   end;
 end;
 
-procedure TWebApiRepository.GetAllQuestions(var AQuestions: TList<TQuestion>);
+procedure TWebApiRepository.GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
 var
   jsonArr: TJSONArray;
   jsonValue : TJSONValue;
@@ -198,14 +218,55 @@ begin
 end;
 
 procedure TWebApiRepository.GetJournalDateSummary(ADateFrom, ADateTo: TDate;
-  var AJournalDateSummary: TList<TJournalDateSummary>);
+  var AJournalDateSummary: TObjectList<TJournalDateSummary>);
+var
+  jsonArr: TJSONArray;
+  jsonValue : TJSONValue;
 begin
+  InitialiseWebApiConnection(rmGET, FWebApiUrl + API_JOURNAL_ENTRY_DATE_SUMMARY);
+  try
+    FRestRequest.Params.AddItem('datefrom', FormatJsonDate(ADateFrom));
+    FRestRequest.Params.AddItem('dateto', FormatJsonDate(ADateTo));
 
+    FRestRequest.Execute;
+
+    jsonArr := nil;
+    try
+      jsonArr := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FRestResponse.Content),0) as TJSONArray;
+      for jsonValue in jsonArr do
+      begin
+        AJournalDateSummary.Add(TJson.JsonToObject<TJournalDateSummary>(jsonValue.ToString));
+      end;
+    finally
+      FreeAndNil(jsonArr);
+    end;
+  finally
+    FinaliseWebApiConnection;
+  end;
 end;
 
-procedure TWebApiRepository.GetJournalEntriesForDay(entryDate: TDate; var AJournalEntries: TList<TJournalEntry>);
+procedure TWebApiRepository.GetJournalEntriesForDay(entryDate: TDate; var AJournalEntries: TObjectList<TJournalEntry>);
+var
+  jsonArr: TJSONArray;
+  jsonValue : TJSONValue;
 begin
+  InitialiseWebApiConnection(rmGET, IncludeTrailingForwardSlash(FWebApiUrl + API_JOURNAL_ENTRY_FOR_DATE)+FormatJsonDate(entryDate));
+  try
+    FRestRequest.Execute;
 
+    jsonArr := nil;
+    try
+      jsonArr := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(FRestResponse.Content),0) as TJSONArray;
+      for jsonValue in jsonArr do
+      begin
+        AJournalEntries.Add(TJson.JsonToObject<TJournalEntry>(jsonValue.ToString));
+      end;
+    finally
+      FreeAndNil(jsonArr);
+    end;
+  finally
+    FinaliseWebApiConnection;
+  end;
 end;
 
 function TWebApiRepository.GetJournalEntry(id: integer): TJournalEntry;
@@ -241,7 +302,7 @@ begin
 end;
 
 procedure TWebApiRepository.GetRandomQuestions(AQuestionCount: integer; AEntryDate: TDate;
-  var AQuestions: TList<TQuestion>);
+  var AQuestions: TObjectList<TQuestion>);
 var
   jsonArr: TJSONArray;
   jsonValue : TJSONValue;
@@ -249,7 +310,7 @@ begin
   InitialiseWebApiConnection(rmGET, FWebApiUrl + API_QUESTION_RANDOM);
   try
     FRestRequest.Params.AddItem('questionCount', IntToStr(AQuestionCount));
-    FRestRequest.Params.AddItem('forDate', FormatDateTime('yyyy-mm-dd',AEntryDate));
+    FRestRequest.Params.AddItem('forDate', FormatJsonDate(AEntryDate));
     FRestRequest.Execute;
 
     jsonArr := nil;
@@ -271,7 +332,7 @@ procedure TWebApiRepository.UpdateJournalEntry(AJournalEntry: TJournalEntry);
 begin
   InitialiseWebApiConnection(rmPUT, IncludeTrailingForwardSlash(FWebApiUrl + API_JOURNAL_ENTRY)+IntToStr(AJournalEntry.Id));
   try
-    FRestRequest.Body.Add(TJson.ObjectToJsonString(AJournalEntry), ctAPPLICATION_JSON);
+    FRestRequest.AddBody(TJson.ObjectToJsonString(AJournalEntry), ctAPPLICATION_JSON);
     FRestRequest.Execute;
   finally
     FinaliseWebApiConnection;
@@ -282,7 +343,7 @@ procedure TWebApiRepository.UpdateQuestion(AQuestion: TQuestion);
 begin
   InitialiseWebApiConnection(rmPUT, IncludeTrailingForwardSlash(FWebApiUrl + API_QUESTION)+IntToStr(AQuestion.Id));
   try
-    FRestRequest.Body.Add(TJson.ObjectToJsonString(AQuestion), ctAPPLICATION_JSON);
+    FRestRequest.AddBody(TJson.ObjectToJsonString(AQuestion), ctAPPLICATION_JSON);
     FRestRequest.Execute;
   finally
     FinaliseWebApiConnection;

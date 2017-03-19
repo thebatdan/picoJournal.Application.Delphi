@@ -21,9 +21,6 @@ object frmRestTest: TfrmRestTest
     Align = alClient
     Caption = 'Panel2'
     TabOrder = 0
-    ExplicitLeft = 265
-    ExplicitWidth = 508
-    ExplicitHeight = 411
     object memRestResponse: TMemo
       Left = 1
       Top = 1
@@ -33,8 +30,6 @@ object frmRestTest: TfrmRestTest
       ScrollBars = ssBoth
       TabOrder = 0
       WordWrap = False
-      ExplicitWidth = 506
-      ExplicitHeight = 409
     end
   end
   object GridPanel1: TGridPanel
@@ -45,7 +40,7 @@ object frmRestTest: TfrmRestTest
     Align = alLeft
     ColumnCollection = <
       item
-        Value = 50.003051571559350000
+        Value = 50.003051571559340000
       end
       item
         Value = 49.996948428440650000
@@ -88,7 +83,7 @@ object frmRestTest: TfrmRestTest
       end
       item
         Column = 0
-        Control = Button10
+        Control = btnJournalEntryGetForDate
         Row = 7
       end
       item
@@ -170,7 +165,6 @@ object frmRestTest: TfrmRestTest
         Value = 130.000000000000000000
       end>
     TabOrder = 1
-    ExplicitHeight = 411
     DesignSize = (
       337
       515)
@@ -256,7 +250,7 @@ object frmRestTest: TfrmRestTest
       TabOrder = 4
       OnClick = btnQuestionPutClick
     end
-    object Button10: TButton
+    object btnJournalEntryGetForDate: TButton
       Left = 24
       Top = 356
       Width = 120
@@ -264,6 +258,7 @@ object frmRestTest: TfrmRestTest
       Anchors = []
       Caption = 'Get For Date'
       TabOrder = 5
+      OnClick = btnJournalEntryGetForDateClick
     end
     object btnJournalEntryGetAll: TButton
       Left = 24
@@ -283,8 +278,6 @@ object frmRestTest: TfrmRestTest
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 7
-      ExplicitWidth = 131
-      ExplicitHeight = 50
       object Label3: TLabel
         Left = 5
         Top = 3
@@ -399,9 +392,6 @@ object frmRestTest: TfrmRestTest
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 12
-      ExplicitTop = 135
-      ExplicitWidth = 131
-      ExplicitHeight = 50
       object Label9: TLabel
         Left = 6
         Top = 3
@@ -442,9 +432,6 @@ object frmRestTest: TfrmRestTest
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 13
-      ExplicitTop = 135
-      ExplicitWidth = 131
-      ExplicitHeight = 50
       object Label14: TLabel
         Left = 5
         Top = 6
@@ -484,6 +471,7 @@ object frmRestTest: TfrmRestTest
         Height = 25
         Caption = 'Journal Entry Summary'
         TabOrder = 2
+        OnClick = btnJournalEntrySummaryClick
       end
     end
     object Panel5: TPanel
@@ -494,8 +482,6 @@ object frmRestTest: TfrmRestTest
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 14
-      ExplicitLeft = 174
-      ExplicitTop = 387
       object Label15: TLabel
         Left = 6
         Top = 6

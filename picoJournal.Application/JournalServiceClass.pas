@@ -11,7 +11,7 @@ type
   private
     FRepository: IJournalRepository;
     FQuestionsPerDay: Integer;
-    procedure GetNewQuestionSet(AQuestionsToAdd: Integer; AEntryDate: TDate; var AJournalEntries: TList<TJournalEntry>);
+    procedure GetNewQuestionSet(AQuestionsToAdd: Integer; AEntryDate: TDate; var AJournalEntries: TObjectList<TJournalEntry>);
   protected
 
   public
@@ -22,11 +22,11 @@ type
     procedure AddQuestion(var AQuestion: TQuestion);
     procedure RemoveJournalEntry(id: Integer);
     procedure RemoveQuestion(id: Integer);
-    procedure GetAllJournalEntries(var AJournalEntries: TList<TJournalEntry>);
-    procedure GetAllQuestions(var AQuestions: TList<TQuestion>);
-    procedure GetJournalEntriesForDay(AEntryDate: TDate; var AJournalEntries: TList<TJournalEntry>);
+    procedure GetAllJournalEntries(var AJournalEntries: TObjectList<TJournalEntry>);
+    procedure GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
+    procedure GetJournalEntriesForDay(AEntryDate: TDate; var AJournalEntries: TObjectList<TJournalEntry>);
     procedure UpdateJournalEntry(AJournalEntry: TJournalEntry);
-    procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate; var AJournalDateSummary: TList<TJournalDateSummary>);
+    procedure GetJournalDateSummary(ADateFrom: TDate; ADateTo: TDate; var AJournalDateSummary: TObjectList<TJournalDateSummary>);
   end;
 
 implementation
@@ -56,30 +56,33 @@ begin
 end;
 
 procedure TJournalService.GetAllJournalEntries(
-  var AJournalEntries: TList<TJournalEntry>);
+  var AJournalEntries: TObjectList<TJournalEntry>);
 begin
   FRepository.GetAllJournalEntries(AJournalEntries);
 end;
 
-procedure TJournalService.GetAllQuestions(var AQuestions: TList<TQuestion>);
+procedure TJournalService.GetAllQuestions(var AQuestions: TObjectList<TQuestion>);
 begin
   FRepository.GetAllQuestions(AQuestions);
 end;
 
 procedure TJournalService.GetJournalDateSummary(ADateFrom, ADateTo: TDate;
-  var AJournalDateSummary: TList<TJournalDateSummary>);
+  var AJournalDateSummary: TObjectList<TJournalDateSummary>);
 begin
   FRepository.GetJournalDateSummary(ADateFrom, ADateTo, AJournalDateSummary);
 end;
 
 procedure TJournalService.GetJournalEntriesForDay(AEntryDate: TDate;
-  var AJournalEntries: TList<TJournalEntry>);
-var
-  aDate: TDate;
+  var AJournalEntries: TObjectList<TJournalEntry>);
 begin
   FRepository.GetJournalEntriesForDay(AEntryDate, AJournalEntries);
-  aDate := Date;
-  if (AJournalEntries.Count < FQuestionsPerDay) and IsSameDay(AEntryDate, aDate) then
+
+  // For now, fill any day's journal list with the required number of questions. Later,
+  // only the current day will be editable.
+  if (AJournalEntries.Count < FQuestionsPerDay) then
+  // If it is the current day, and there are less journal entries logged than required,
+  // fill up the list with a random set of queries.
+  //if (AJournalEntries.Count < FQuestionsPerDay) and IsSameDay(AEntryDate, Date) then
   begin
     GetNewQuestionSet(FQuestionsPerDay - AJournalEntries.Count, AEntryDate, AJournalEntries);
   end;
@@ -91,13 +94,14 @@ begin
 end;
 
 procedure TJournalService.GetNewQuestionSet(AQuestionsToAdd: Integer; AEntryDate: TDate;
-  var AJournalEntries: TList<TJournalEntry>);
+  var AJournalEntries: TObjectList<TJournalEntry>);
 var
-  aQuestionList: TList<TQuestion>;
+  aQuestionList: TObjectList<TQuestion>;
   aQuestion: TQuestion;
   aJournalEntry: TJournalEntry;
 begin
-  aQuestionList := TList<TQuestion>.Create;
+  aQuestionList := TObjectList<TQuestion>.Create;
+  aQuestionList.OwnsObjects := False;
   try
     FRepository.GetRandomQuestions(AQuestionsToAdd, AEntryDate, aQuestionList);
     for aQuestion in aQuestionList do
@@ -108,7 +112,7 @@ begin
       AJournalEntries.Add(aJournalEntry);
     end;
   finally
-    FreeAndNil(aQuestionList) ;
+    FreeAndNil(aQuestionList);
   end;
 end;
 

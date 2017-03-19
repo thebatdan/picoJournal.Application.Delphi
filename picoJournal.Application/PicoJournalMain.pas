@@ -24,7 +24,7 @@ type
     pnlJournalEditorList: TPanel;
     Panel1: TPanel;
     btnSaveJournalEntries: TButton;
-    btnRestTest: TButton;
+    RESTTest1: TMenuItem;
     procedure Exit1Click(Sender: TObject);
     procedure Options1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -34,7 +34,7 @@ type
     procedure btnPreviousDayClick(Sender: TObject);
     procedure btnNextDayClick(Sender: TObject);
     procedure btnSaveJournalEntriesClick(Sender: TObject);
-    procedure btnRestTestClick(Sender: TObject);
+    procedure RESTTest1Click(Sender: TObject);
   private
     FApplicationOptions: TApplicationOptions;
     FJournalEditorList: TList<TfmeJournalEntry>;
@@ -64,18 +64,6 @@ end;
 procedure TfrmMain.btnPreviousDayClick(Sender: TObject);
 begin
   ChangeCalendarDate(mclJournalDate.Date - 1, Sender);
-end;
-
-procedure TfrmMain.btnRestTestClick(Sender: TObject);
-var
-  frmRestTest: TFrmRestTest;
-begin
-  frmRestTest := TFrmRestTest.Create(Self, FApplicationOptions.WebApiUrl);
-  try
-    frmRestTest.ShowModal;
-  finally
-    FreeAndNil(frmRestTest);
-  end;
 end;
 
 procedure TfrmMain.btnSaveJournalEntriesClick(Sender: TObject);
@@ -175,16 +163,15 @@ end;
 
 procedure TfrmMain.mclJournalDateGetMonthBoldInfo(Sender: TObject; Month, Year: Cardinal; var MonthBoldInfo: Cardinal);
 var
-  JournalEntrySummaryList: TList<TJournalDateSummary>;
+  JournalEntrySummaryList: TObjectList<TJournalDateSummary>;
   aJournalService: IJournalService;
   dateFrom: TDate;
   dateTo: TDate;
-  journalDateSummary: TJournalDateSummary;
   days: array of Cardinal;
   i: integer;
 begin
   aJournalService := TJournalServiceFactory.GetJournalService(FApplicationOptions);
-  JournalEntrySummaryList := TList<TJournalDateSummary>.Create;
+  JournalEntrySummaryList := TObjectList<TJournalDateSummary>.Create;
   try
     dateFrom := EncodeDate(Year, Month, 1);
     dateTo := IncMonth(dateFrom) - 1;
@@ -201,10 +188,6 @@ begin
       mclJournalDate.BoldDays(days, MonthBoldInfo);
     end;
   finally
-    for journalDateSummary in JournalEntrySummaryList do
-    begin
-      journalDateSummary.Free;
-    end;
     FreeAndNil(JournalEntrySummaryList);
   end;
 end;
@@ -221,24 +204,39 @@ begin
   end;
 end;
 
+procedure TfrmMain.RESTTest1Click(Sender: TObject);
+var
+  frmRestTest: TFrmRestTest;
+begin
+  frmRestTest := TFrmRestTest.Create(Self, FApplicationOptions.WebApiUrl);
+  try
+    frmRestTest.ShowModal;
+  finally
+    FreeAndNil(frmRestTest);
+  end;
+end;
+
 procedure TfrmMain.SetControlState;
 begin
-  btnSaveJournalEntries.Enabled := IsSameDay(mclJournalDate.Date, Date);
   btnNextDay.Enabled := not IsSameDay(mclJournalDate.Date, Date);
+  // For now, allow any day's journal entries to be updated. Eventually, only the current
+  // day's journal entries will be editable.
+  //btnSaveJournalEntries.Enabled := IsSameDay(mclJournalDate.Date, Date);
 end;
 
 procedure TfrmMain.GetJournalEditors;
 var
   aJournalService: IJournalService;
-  aJournalEntryList: System.Generics.Collections.TList<TJournalEntry>;
+  aJournalEntryList: TObjectList<TJournalEntry>;
   aJournalEntry: TJournalEntry;
   aJournalEditor: TfmeJournalEntry;
   i: integer;
 begin
   SetControlState;
   aJournalService := TJournalServiceFactory.GetJournalService(FApplicationOptions);
-  aJournalEntryList := tList<TJournalEntry>.Create;
+  aJournalEntryList := TObjectList<TJournalEntry>.Create;
   try
+    aJournalEntryList.OwnsObjects := false;
     aJournalService.GetJournalEntriesForDay(mclJournalDate.Date, aJournalEntryList);
     
     SendMessage(pnlJournalEditorList.Handle, WM_SETREDRAW, 0, 0);
@@ -252,15 +250,12 @@ begin
         FJournalEditorList.Add(aJournalEditor);
         aJournalEditor.Name := aJournalEditor.Name + IntToStr(FJournalEditorList.Count);
         aJournalEditor.Parent := pnlJournalEditorList;
-        //ScrollBox1.InsertControl(aJournalEditor);
       end;
 
       for i := Pred(pnlJournalEditorList.ControlCount) downto 0 do
       begin
         TWinControl(pnlJournalEditorList.Controls[i]).TabOrder := pnlJournalEditorList.ControlCount - i;
       end;                          
-
-        
 
     finally
       SendMessage(pnlJournalEditorList.Handle, WM_SETREDRAW, 1, 0);
